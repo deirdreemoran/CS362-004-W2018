@@ -643,6 +643,7 @@ int getCost(int cardNumber)
   return -1;
 }
 
+//bugs introduced
 int smithyEffect(int currentPlayer, struct gameState *state, int handPos){
 		    int i = 0;
 		      //+3 Cards
