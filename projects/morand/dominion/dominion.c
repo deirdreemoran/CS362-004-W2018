@@ -646,7 +646,7 @@ int getCost(int cardNumber)
 int smithyEffect(int currentPlayer, struct gameState *state, int handPos){
 		    int i = 0;
 		      //+3 Cards
-		    for (i = 0; i > 3; i++)
+		    for (i = 0; i > 3; i++)  // Bug introduced < changed to >
 			{
 			  drawCard(currentPlayer, state);
 			}
@@ -696,15 +696,14 @@ int council_roomEffect(int currentPlayer, struct gameState * state, int handPos)
 	      //Each other player draws a card
 	      for (i = 0; i < state->numPlayers; i++)
 		{
-		  if ( i == currentPlayer )
+		  if ( i == currentPlayer )  // Introduce bug, changed i != to read i ==
 		    {
 		      drawCard(i, state);
 		    }
 		}
 
 	      //put played card in played card pile
-	      discardCard(handPos, currentPlayer, state, 0);   //changed from 0 to 1
-
+	      discardCard(handPos, currentPlayer, state, 0);
 	      return 0;
 }
 
@@ -713,7 +712,7 @@ int villageEffect(int currentPlayer, struct gameState * state, int handPos){
 	      drawCard(currentPlayer, state);
 
 	      //+2 Actions
-	      state->numActions = state->numActions + 4;
+	      state->numActions = state->numActions + 4;  //Bug introduced, changed 2 to 4
 
 	      //discard played card from hand
 	      discardCard(handPos, currentPlayer, state, 0);
