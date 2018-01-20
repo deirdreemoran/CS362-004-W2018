@@ -643,7 +643,6 @@ int getCost(int cardNumber)
   return -1;
 }
 
-//bugs introduced
 int smithyEffect(int currentPlayer, struct gameState *state, int handPos){
 		    int i = 0;
 		      //+3 Cards
@@ -661,7 +660,7 @@ int smithyEffect(int currentPlayer, struct gameState *state, int handPos){
 int adventurerEffect(int drawntreasure, struct gameState *state, int currentPlayer, int * temphand){
 	  int z = 0;  // counter for temp hand
 	    int cardDrawn;
-	while(drawntreasure<2){
+	while(drawntreasure>2){   // bug introduced changed <  to >
 		if (state->deckCount[currentPlayer] <1){//if the deck is empty we need to shuffle discard and add to deck
 		  shuffle(currentPlayer, state);
 		}
@@ -677,7 +676,7 @@ int adventurerEffect(int drawntreasure, struct gameState *state, int currentPlay
 	      }
 	      while(z-1>=0){
 		state->discard[currentPlayer][state->discardCount[currentPlayer]++]=temphand[z-1]; // discard all cards in play that have been drawn
-		z=z+1;
+		z=z-1;
 	      }
 	      return 0;
   }
@@ -697,14 +696,14 @@ int council_roomEffect(int currentPlayer, struct gameState * state, int handPos)
 	      //Each other player draws a card
 	      for (i = 0; i < state->numPlayers; i++)
 		{
-		  if ( i != currentPlayer )
+		  if ( i == currentPlayer )
 		    {
 		      drawCard(i, state);
 		    }
 		}
 
 	      //put played card in played card pile
-	      discardCard(handPos, currentPlayer, state, 1);
+	      discardCard(handPos, currentPlayer, state, 0);   //changed from 0 to 1
 
 	      return 0;
 }
@@ -731,7 +730,6 @@ int villageEffect(int currentPlayer, struct gameState * state, int handPos){
 	        //discard card from hand
 	        discardCard(handPos, currentPlayer, state, 0);
       return 0;
-
   }
 
 
