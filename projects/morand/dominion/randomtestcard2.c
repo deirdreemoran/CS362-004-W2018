@@ -1,13 +1,13 @@
-// randomtestadventurer.c
+//randomtestcard2.c
 // Name: Deirdre Moran
-// Function:  Randomly tests the Dominion adventurer card
+// Function:  Tests the smithy card
 
 
 /*
  * Include the following lines in your makefile:
  *
- * randomtestadventurer: randomtestadventurer.c dominion.o rngs.o
- *      gcc -o randomtestadventurer -g  randomtestadventurer.c dominion.o rngs.o $(CFLAGS)
+ * randomtestcard2: randomtestcard2.c dominion.o rngs.o
+ *      gcc -o randomtestcard2 -g  randomtestcard2.c dominion.o rngs.o $(CFLAGS)
  */
 
 
@@ -21,25 +21,29 @@
 #include <assert.h>
 #include <time.h>
 
-
-#define TESTCARD "adventurer"
+#define TESTCARD "smithy"
 #define MAX_NUM_TESTS 1
 
 int main() {
-	// seed random number
-    srand(time(NULL));
+	srand(time(NULL));
     int seed;
+    int index;
+    int newCards = 0;
+    int discarded = 1;
+    int xtraCoins = 0;
+    int shuffledCards = 0;
+	int treasure;
+	int tempHand;
+	int numPlayers = 2;
     int thisPlayer = 0;
-    int i, j, index;
+    int i, j, m;
     int handpos = 0, choice1 = 0, choice2 = 0, choice3 = 0, bonus = 0;
+	char * file = __FILE__;
+
 	struct gameState G, testG;
+	int v[3] = {estate, duchy, province};
 	int k[10] = {adventurer, embargo, village, minion, mine, cutpurse,
 			sea_hag, tribute, smithy, council_room};
-	int v[3] = {estate, duchy, province};
-	int t[3] = {copper, silver, gold};
-	int cpr = 4;
-	int slvr = 5;
-	int gld = 6;
 
 
 	// for all tests
@@ -49,14 +53,12 @@ int main() {
 		// initialize a game state and player cards
 		initializeGame(MAX_PLAYERS, k, seed, &G);
 
-
 		for(thisPlayer = 0; thisPlayer < MAX_PLAYERS; thisPlayer++)
 		{
 			// set random values for discard, hand, and deck counts
 			G.discardCount[thisPlayer] = rand() % MAX_DECK;
 			G.handCount[thisPlayer] = rand() % MAX_HAND;
 			G.deckCount[thisPlayer] = rand() % MAX_DECK;
-
 			// for each card in the three piles of each player, set random cards
 			for (j = 0; j < G.discardCount[thisPlayer]; j++){
 				G.discard[thisPlayer][j] = rand() % treasure_map + 1;
@@ -68,59 +70,45 @@ int main() {
 				G.deck[thisPlayer][j] = rand() % treasure_map + 1;
 			}
 		}
-		int jj;
-		for (jj = 0; jj < 20; jj++){
+		// set random handposition
+		handpos = rand() % MAX_HAND;
 
-			//keep the game running
-		// copy the game state to a test case
+		// initialize a game state and player cards
+		initializeGame(numPlayers, k, seed, &G);
 		memcpy(&testG, &G, sizeof(struct gameState));
-
-		// call adventurer cardEffect
-		cardEffect(adventurer, choice1, choice2, choice3, &testG, handpos, 0);
-
+		cardEffect(smithy, choice1, choice2, choice3, &testG, handpos, 0);
 
 		printf("----------------- Testing Card: %s ----------------\n\n", TESTCARD);
-		// ----------- TEST 1: handCount of current player has increased by 2:  drawCard--------------
-		printf("TEST 1: two treasures are removed from deck and placed in hand\n");
+
+		// ----------- TEST 1: handCount of current player has increased by 2 (3 drawn, 1 disgarded)--------------
+		printf("TEST 1: handCount of current player increases by 2\n");
 		printf("handCount is %d, expected %d\n\n", testG.handCount[thisPlayer], G.handCount[thisPlayer] + 2);
-		myAssert(G.handCount[thisPlayer] + 2 == testG.handCount[thisPlayer], __FILE__, __LINE__);
+
+		// Assert that testG.handCount = G.handCount - # discarded + # added to hand
+		myAssert(testG.handCount[thisPlayer] == G.handCount[thisPlayer] + 2, file, __LINE__);
+
+		// ----------- TEST 2: the three drawn cards came from player's deck--------------
+		printf("TEST 2: the three drawn cards came from player's deck\n");
+		printf("deckCount is %d, expected %d\n\n", testG.deckCount[thisPlayer], G.deckCount[thisPlayer] - 3);
+		// Assert that the three cards came from player's deck
+		myAssert(testG.deckCount[thisPlayer] == G.deckCount[thisPlayer] - 3, file, __LINE__);
 
 
-		// ----------- TEST 2: the 2 extra cards should come from discard or deck --------------
-		printf("TEST 2: the 2 extra cards should come from discard or deck \n");
-
-		// Check that the two cards came from discard or deck
-		// the difference between G and testG should be 2
-			printf("Difference is %d, expected %d\n\n",  G.discardCount[thisPlayer] + G.deckCount[thisPlayer] - testG.discardCount[thisPlayer] - testG.deckCount[thisPlayer], 2);
-			myAssert(G.discardCount[thisPlayer] + G.deckCount[thisPlayer] == testG.discardCount[thisPlayer] + testG.deckCount[thisPlayer] + 2, __FILE__, __LINE__);
-
-		// ----------- TEST 3: 2 drawn cards should be treasure cards --------------
-		printf("TEST 3: 2 drawn cards should be treasure cards \n");
-
-		// Check that treasure cards were drawn, they should be the top two cards of hand
-		printf("treasure card is %d, expected %d or %d or %d\n", testG.hand[thisPlayer][testG.handCount[thisPlayer]-1], 4 , 5, 6);
-		printf("treasure card is %d, expected %d or %d or %d\n\n", testG.hand[thisPlayer][testG.handCount[thisPlayer]-2], 4, 5, 6);
-
-		myAssert((testG.hand[thisPlayer][testG.handCount[thisPlayer]-1] == cpr) || (testG.hand[thisPlayer][testG.handCount[thisPlayer]-1] == slvr) || (testG.hand[thisPlayer][testG.handCount[thisPlayer]-1] == gld), __FILE__, __LINE__);
-		myAssert((testG.hand[thisPlayer][testG.handCount[thisPlayer]-2] == cpr) || (testG.hand[thisPlayer][testG.handCount[thisPlayer]-2] == slvr) || (testG.hand[thisPlayer][testG.handCount[thisPlayer]-2] == gld), __FILE__, __LINE__);
-
-		// ----------- TEST 4: state of game should not change for other players --------------
-		printf("TEST 4: state of game should not change for other players  \n");
+		// ----------- TEST 3: state of game should not change for other players --------------
+		printf("TEST 3: state of game should not change for other players  \n");
 
 		//Assert other players are unaffected
-		for (j = 1; j < MAX_PLAYERS; j++){
+		for (j = 1; j < numPlayers; j++){
 			myAssert(testG.handCount[thisPlayer + j] == G.handCount[thisPlayer + j], __FILE__, __LINE__);
 			myAssert(testG.deckCount[thisPlayer + j] == G.deckCount[thisPlayer + j], __FILE__, __LINE__);
 			myAssert(testG.discardCount[thisPlayer + j] == G.discardCount[thisPlayer + j], __FILE__, __LINE__);
 			//Assert that other player's hand, deck, and discard have exactly the same cards
 			for (i = 0; i < testG.handCount[thisPlayer + j]; i++){
 				myAssert(testG.hand[thisPlayer + j][i] == G.hand[thisPlayer + j][i], __FILE__, __LINE__);
-
-			}
+				}
 			for (i = 0; i < testG.deckCount[thisPlayer + j]; i++){
 					myAssert(testG.deck[thisPlayer + j][i] == G.deck[thisPlayer + j][i], __FILE__, __LINE__);
-
-			}
+				}
 			for (i = 0; i < testG.discardCount[thisPlayer + j]; i++){
 					myAssert(testG.discard[thisPlayer + j][i] == G.discard[thisPlayer + j][i], __FILE__, __LINE__);
 			}
@@ -143,15 +131,10 @@ int main() {
 			printf("Card %d count = %d, expected = %d\n", k[i], testG.supplyCount[k[i]], G.supplyCount[k[i]]);
 			myAssert(testG.supplyCount[k[i]] == G.supplyCount[k[i]], __FILE__, __LINE__);
 		}
+			printf("\n\n >>>>> SUCCESS: Testing complete %s <<<<<\n\n", TESTCARD);
+
+	}
+	return 0;
 }
-		printf("\n\n >>>>> SUCCESS: Testing complete %s <<<<<\n\n", TESTCARD);
 
 
-	}//end main testing for loop
-
-
-
-		return 0;
-
-
-}
