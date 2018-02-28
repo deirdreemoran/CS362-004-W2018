@@ -1,0 +1,120 @@
+BUG 1 of 2
+Title:   Smithy Card Effect – Incorrect values for handCount and deckCount 
+
+Class:  Minor Bug
+
+Date: 2/27/2018          
+Reported By:  Deirdre Moran  
+Email:  morand@oregonstate.edu
+
+
+Product:   dominion.c           Version:   Assignment-2
+URL:  https://github.com/deirdreemoran/CS362-004-W2018/tree/master/projects/morand/elliskenDominion 
+
+Is it reproducible: Yes
+
+Description
+===========
+Ran cardTest2 for Smithy Card and assertions for handCount and deckCount failed test cases for all values.  I ran cardtest2.c, checked the gcov files for test results and noticed that the smithyCard failed these two tests.  The first one tests the handCount of the player after a smithy Card is played.  The handCount of the current player should increase by 2, but instead, the handcount increased by 3.   Error message is “***Did not pass assert test in file cardtest2.c’ line 57.***”.  The second failure occurred when testing whether or not the three drawn cards came from the player’s deck.  There are two problems here – the expected result should be 3, but is not, and the deckCount of the current player is only 1, when it should be 3.  The error message reads “***Did not pass assert test in file ‘cardtest2.c’ line 63.***”.
+
+
+Steps to Produce/Reproduce
+--------------------------
+From within the dominion folder, run “make all”.  Then open “unittestresults.out” file and locate smithy test results.  The assertion failures will be listed there.
+
+
+Expected Results
+----------------
+I expected to see matching deck and hand Counts with expected results.  The handCount of the current player should increase by 2, and the deckCount of the three drawn cards should come from the player’s own deck.
+
+
+Actual Results
+--------------
+
+TEST 1: handCount of current player increases by 2
+handCount is 8, expected 7
+*** Did not pass assert test in file 'cardtest2.c' line 57.***
+
+TEST 2: the three drawn cards came from player's deck
+deckCount is 1, expected 2
+*** Did not pass assert test in file 'cardtest2.c' line 63.***
+Workarounds
+-----------
+In the ‘cardSmithy’ function of dominion.c, the for loop should be for values less than 3 instead of less than or equal to 3.  Too many cards are being drawn, which is throwing off the deck and hand counts.
+
+
+Attachments
+-----------
+
+
+
+
+BUG 2 of 2
+Title:   Adventurer Card Effect – Incorrect values for handCount and extra cards 
+
+Class:  Minor Bug
+
+Date: 2/27/2018          
+Reported By:  Deirdre Moran  
+Email:  morand@oregonstate.edu
+
+
+Product:   dominion.c           Version:   Assignment-2
+URL:  https://github.com/deirdreemoran/CS362-004-W2018/tree/master/projects/morand/elliskenDominion 
+
+Is it reproducible: Yes
+
+Description
+===========
+Ran cardTest4 for Adventurer Card and assertions for handCount and extra card failed test cases for all values.  I ran cardtest4.c, checked the gcov files for test results and noticed that the AdventurerCard failed these two tests.  The first one tests if the two treasures are removed from the deck and placed into the hand.  The handCount of the current player should increase by 2, but instead, the handcount increased by is a negative value.   Error message is “***Did not pass assert test in file cardtest4.c’ line 53.***”.  The second failure occurred when testing whether or not the 2 extra cards came from the discard or deck piles.  The expected value is 2, but the test returned 5.  Three extra cards are being added.  The error message reads “***Did not pass assert test in file ‘cardtest4.c’ line 62.***”.
+
+
+Steps to Produce/Reproduce
+--------------------------
+From within the dominion folder, run “make all”.  Then open “unittestresults.out” file and locate adventurer test results.  The assertion failures will be listed there.
+
+
+Expected Results
+----------------
+I expected to see a matching deck count and 2 extra cards from either the discard or deck piles.  
+
+
+Actual Results
+--------------
+
+	----------------- Testing Card: adventurer ----------------
+
+TEST 1: two treasures are removed from deck and placed in hand
+handCount is -79, expected 7
+
+*** Did not pass assert test in file 'cardtest4.c' line 53.***
+
+TEST 2: the 2 extra cards should come from discard or deck
+Difference is 5, expected 2
+
+*** Did not pass assert test in file 'cardtest4.c' line 62.***
+
+Workarounds
+-----------
+In the ‘cardAdventurer’ function of dominion.c, in the while loop for drawn treasure < 2 (see attachment below), the if statement for if(cardDrawn == gold) only increases the treasure count for gold coins, allowing the player to repeatedly draw coins that are silver and copper.  The player could essentially draw as many copper and silver coins as they want, so lond as gold coins are not drawn more than twice.  This allows the player to loop through the while loop for drawntreasure many more times than just twice.  To fix this, the if statement should be changed to include copper and silver coins, as such:  
+    if (cardDrawn == gold || cardDrawn == silver || cardDrawn == copper)
+
+
+Attachments
+-----------
+
+
+
+
+
+
+
+
+
+1
+
+
+
+
+
+
